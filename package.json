@@ -1,0 +1,48 @@
+{
+  "name": "api-gateway",
+  "version": "1.0.0",
+  "description": "AI API Gateway with credit system using Zuplo",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "bcrypt": "^5.1.1",
+    "crypto": "^1.0.1",
+    "cors": "^2.8.5",
+    "winston": "^3.10.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.5.9",
+    "@types/pg": "^8.10.2",
+    "@types/bcrypt": "^5.0.0",
+    "@types/cors": "^2.8.14",
+    "@types/jest": "^29.5.5",
+    "typescript": "^5.2.2",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "@types/eslint__js": "^8.42.3",
+    "typescript-eslint": "^8.0.0"
+  },
+  "keywords": [
+    "api-gateway",
+    "zuplo",
+    "ai",
+    "credit-system"
+  ],
+  "author": "API Gateway Team",
+  "license": "MIT"
+}

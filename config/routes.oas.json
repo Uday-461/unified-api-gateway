@@ -1,0 +1,224 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Unified AI + MCP API Gateway",
+    "version": "2.0.0",
+    "description": "Unified API gateway for AI services (LLM) and MCP servers with shared authentication and credit management"
+  },
+  "paths": {
+    "/api/v1/{vendor}/{model}": {
+      "post": {
+        "summary": "Proxy to AI vendor APIs (LLM Gateway)",
+        "tags": ["LLM Gateway"],
+        "parameters": [
+          {
+            "name": "vendor",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "enum": ["openai", "anthropic"] },
+            "description": "AI service provider"
+          },
+          {
+            "name": "model",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Model name (e.g., gpt-4, claude-3)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" },
+              "examples": {
+                "openai": {
+                  "summary": "OpenAI Chat Completion",
+                  "value": {
+                    "messages": [
+                      {"role": "user", "content": "Hello, world!"}
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-zuplo-route": {
+          "corsPolicy": "anything-goes",
+          "policies": {
+            "inbound": [
+              "api-key-auth",
+              "llm-credit-validation",
+              "llm-request-enrichment"
+            ],
+            "outbound": [
+              "llm-usage-logging"
+            ]
+          },
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/vendor-proxy)"
+          }
+        }
+      }
+    },
+    "/api/mcp/{serverId}": {
+      "post": {
+        "summary": "Proxy to MCP servers (MCP Gateway)",
+        "tags": ["MCP Gateway"],
+        "parameters": [
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "MCP server identifier",
+            "examples": {
+              "weather": {
+                "summary": "Weather Server",
+                "value": "example-weather"
+              },
+              "calculator": {
+                "summary": "Calculator Server",
+                "value": "demo-calculator"
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "method": {
+                    "type": "string",
+                    "enum": ["tools/call"],
+                    "description": "MCP method"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Tool name to call"
+                      },
+                      "arguments": {
+                        "type": "object",
+                        "description": "Tool arguments"
+                      }
+                    },
+                    "required": ["name"]
+                  }
+                },
+                "required": ["method", "params"]
+              },
+              "examples": {
+                "weather_call": {
+                  "summary": "Get Weather",
+                  "value": {
+                    "method": "tools/call",
+                    "params": {
+                      "name": "get_current_weather",
+                      "arguments": {
+                        "location": "San Francisco, CA"
+                      }
+                    }
+                  }
+                },
+                "calculator_call": {
+                  "summary": "Calculate",
+                  "value": {
+                    "method": "tools/call",
+                    "params": {
+                      "name": "calculate",
+                      "arguments": {
+                        "expression": "2 + 2"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-zuplo-route": {
+          "corsPolicy": "anything-goes",
+          "policies": {
+            "inbound": [
+              "api-key-auth",
+              "mcp-credit-validation",
+              "mcp-request-enrichment"
+            ],
+            "outbound": [
+              "mcp-usage-logging"
+            ]
+          },
+          "handler": {
+            "export": "default",
+            "module": "$import(./modules/mcp-proxy)"
+          }
+        }
+      }
+    },
+    "/api/v1/user/credits": {
+      "get": {
+        "summary": "Get user credit balance",
+        "tags": ["User Management"],
+        "x-zuplo-route": {
+          "corsPolicy": "anything-goes",
+          "policies": {
+            "inbound": ["api-key-auth"]
+          },
+          "handler": {
+            "export": "getCreditBalance",
+            "module": "$import(./modules/auth)"
+          }
+        }
+      }
+    },
+    "/api/mcp/servers": {
+      "get": {
+        "summary": "List available MCP servers",
+        "tags": ["MCP Discovery"],
+        "x-zuplo-route": {
+          "corsPolicy": "anything-goes",
+          "policies": {
+            "inbound": ["api-key-auth"]
+          },
+          "handler": {
+            "export": "listMCPServers",
+            "module": "$import(./modules/mcp-discovery)"
+          }
+        }
+      }
+    },
+    "/api/mcp/server/{serverId}/info": {
+      "get": {
+        "summary": "Get MCP server details and available tools",
+        "tags": ["MCP Discovery"],
+        "parameters": [
+          {
+            "name": "serverId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "MCP server identifier"
+          }
+        ],
+        "x-zuplo-route": {
+          "corsPolicy": "anything-goes",
+          "policies": {
+            "inbound": ["api-key-auth"]
+          },
+          "handler": {
+            "export": "getMCPServerInfo",
+            "module": "$import(./modules/mcp-discovery)"
+          }
+        }
+      }
+    }
+  }
+}

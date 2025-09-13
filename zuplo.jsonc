@@ -1,0 +1,71 @@
+{
+  "$schema": "https://cdn.zuplo.com/schemas/zuplo.jsonc",
+  "name": "unified-api-gateway",
+  "description": "Unified AI + MCP API Gateway with credit system",
+  "version": "2.0.0",
+  "environment": {
+    "variables": {
+      "DATABASE_URL": "$env(DATABASE_URL)",
+      "CONTROL_PLANE_URL": "$env(CONTROL_PLANE_URL)",
+      "ENCRYPTION_KEY": "$env(ENCRYPTION_KEY)"
+    }
+  },
+  "policies": [
+    {
+      "name": "api-key-auth",
+      "policyType": "api-key-auth-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./policies/api-key-auth)"
+      }
+    },
+    {
+      "name": "llm-credit-validation",
+      "policyType": "function-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./policies/llm-credit-validation)"
+      }
+    },
+    {
+      "name": "mcp-credit-validation",
+      "policyType": "function-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./policies/mcp-credit-validation)"
+      }
+    },
+    {
+      "name": "llm-request-enrichment",
+      "policyType": "function-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./policies/llm-request-enrichment)"
+      }
+    },
+    {
+      "name": "mcp-request-enrichment",
+      "policyType": "function-inbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./policies/mcp-request-enrichment)"
+      }
+    },
+    {
+      "name": "llm-usage-logging",
+      "policyType": "function-outbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./policies/llm-usage-logging)"
+      }
+    },
+    {
+      "name": "mcp-usage-logging",
+      "policyType": "function-outbound",
+      "handler": {
+        "export": "default",
+        "module": "$import(./policies/mcp-usage-logging)"
+      }
+    }
+  ]
+}
